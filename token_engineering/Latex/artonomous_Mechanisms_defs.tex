@@ -166,7 +166,7 @@ In the quadratic case,
 \end{equation} 
 and it suffices to solve for $s$,
 \begin{equation}
-s = s(e,E_\alpha, S) = 
+s = s(e,E_\alpha, S) = \left(2\frac{e}{E_\alpha}+e^2\right)\cdot S
 \end{equation}
 
 Such an invariant based derivation means that the designer may choose any bonding curve with $f(S)=S$ and can reasonably expect to have a simply computable mechanism. More complex mechanisms may be designed for general $f(S)$ but the calculus becomes more difficult and in many cases impractical for derivation or computation.
@@ -175,7 +175,7 @@ Having defined the Bonding mechanism as state dependent, it can be viewed as sta
 \begin{eqnarray}
 E_\alpha^+ &=& E_\alpha + e \\
 S^+ &=& S+s(e,E_\alpha, S)\\
-&=& .
+&=&  \left(1+2\frac{e}{E_\alpha}+e^2\right)\cdot S
 \end{eqnarray}
 for each user action characterized by Bonding an amount of Ether $e$ and receiving an amount of soul $s(e,E_\alpha, S)$.
 
@@ -222,5 +222,9 @@ The private signals $V_a$ maybe be rational or irrational or a mixture. Rational
 
 
 \section{Economy Discrete Differential Equations}
+
+section{Future Work} 
+
+Write simulations in python.
 
 \end{document}  
