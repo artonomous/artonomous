@@ -297,7 +297,7 @@ implicitly defined in terms of $[\hat e_i]_+$ where $[\cdot]_+$ denotes the posi
 All of the definitions and derivations in the preceding sections exist for the purpose of having a well defined discrete dynamical system model characterized by state feedback mechanisms and well defined driving stochastic processes.
 
 \begin{eqnarray}
-\mathcal{G}(k+1) &=& \left(\mathcal{G}(k) \setminus \{w: k_1(w)=k\}\right) \cup \{w : k_0 = k\} \\
+\mathcal{G}(k+1) &=& \left(\mathcal{G}(k) \setminus \{w: k_1(w)=k\}\right) \cup \{w : k_0(w) = k\} \\
 E_\alpha(k+1) &=& E_\alpha(k) \cdot \left(1- \frac{\phi \sum_{i<j} H_i}{S}\right) + \sum_{i>j}  \theta\cdot [\hat e_i]_+\\
 &&+\sum_{w\in\{w: k_1(w)=k\}} p_w\left(k-k_0(w)\right)  \qquad-\sum_{w\in\{w : k_0(w) = k\}} c(w)\\
 S(k+1) &=& S \cdot \left(1+ \theta \sum_{i>j} \left(2\frac{[\hat e_i]_+}{E_\alpha}+\theta\cdot [\hat e_i]^2_+\right)\right)- \phi \sum_{i<j} H_i \\
