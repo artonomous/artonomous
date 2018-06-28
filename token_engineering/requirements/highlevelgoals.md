@@ -4,16 +4,33 @@ Artonomous is a self-sustaining, self-improving, autonomous artist. It generates
 -	Quote from [Readme](https://github.com/simondlr/artonomous/blob/9551c9ad6eb582368bdd9acb4eb1bed50736854c/README.md) (Simon)
 
 ## System Level Requirements
-1. Every day, Artonomous creates and sells a piece of art
-1. The proceeds from the art that is sold gets deposited into a pool controlled by Artonomous (the _Pool_)
-1. The art is created by an offline piece of code (the _Generator_) which takes a blockhash from Ethereum as its input
+1. Every day, Artonomous must create and put for sale a piece of art
+1. The art is created by an offline piece of software (the _Generator_) which takes a blockhash from the Ethereum blockchain as its input
+1. It must be possible to improve the Generator
+1. The art created is immutable
 1. The piece of art is represented as an ERC721-token, tradable and transferable on the Ethereum blockchain
-1. The system is governed by holders of soul tokens
-1. Soul token holders determine what Generator will be used by the artist
+1. The system is governed by holders of soul tokens, who determine what Generator will be used by the artist
+
+## System Design (as currently documented throughout the artonomous repo)
 1. At any point someone can mint soul tokens by sending ETH to the artist
 1. The more soul tokens in circulation, the higher the price of the new soul tokens
 1. The ETH used to mint soul tokens is deposited in the Pool
 1. A soul token can at any point be destroyed for access to a percentage of the ETH in the Pool
+1. After a cycle of 24 hours, a new auction can be started by anyone, after which a new auction can only happen after 24 hours.
+1. A portion of the Pool can be used to pay people to start auctions if the previous art piece has been claimed/bought.
+1. The Art Auction initiates a linear decaying price function towards zero based on the running average of the past n auctions
+1. The time towards zero is 24 hours.
+1. If the previous auction ended at zero, anyone can pay anything to claim the artwork.
+1. It can be instantly claimed for any price above the previous art auction.
+1. A new auction can't be started unless the previous art piece has been claimed/bought. So if no one bought it after 24 hours, it can go on indefinitely until it's bought/claimed.
+1. The blockhash used in the art generation is determined at the start of auction.
+1. Once claimed, the ERC721 version of the art is created.
+1. The ETH paid towards buying/claiming the art goes into the Pool.
+
+## Questions
+1. What are the incentives to improve the Generator?
+1. How does Artonomous incentivize people to start auctions if the Pool is depleted?
+
 
 [------Work in Progress---------]
 
