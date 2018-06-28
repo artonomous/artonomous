@@ -15,6 +15,7 @@ Artonomous is a self-sustaining, self-improving, autonomous artist. It generates
 1. The ETH used to mint soul tokens is deposited in the Pool
 1. A soul token can at any point be destroyed for access to a percentage of the ETH in the Pool
 
+[------Work in Progress---------]
 
 
 The Artonomous economy has 3 roles:
