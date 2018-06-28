@@ -314,9 +314,9 @@ To iterate a simulation using this differential equation it is necessary to choo
 
 It would be possible to further drive the system with evolving private beliefs of $V_i$ by defining a state dependent linear transformation
 \begin{equation}
-V(k+1) =  \lambda T V(k) + (1-\lambda) P(k) \mathbf{1}  + \delta(k)
+V(k+1) =  \lambda \cdot T V(k) + (1-\lambda) \cdot P(k) \vec{\mathbf{1}}  + \delta(k)
 \end{equation}
-where $T$ is stochastic matrix representing mixing of opinions and $P(k) \mathbf{1}$ represents the influence of the observed price. The relative weight of the opinion mixing process and the observed value are capture by a convex combination weighted by $\lambda\in (0,1)$. The additional term $\delta(k)$ is a noise mode.
+where $T$ is stochastic matrix representing mixing of opinions and $P(k) \vec {\mathbf{1}}$ represents the influence of the observed price. The $\vec{\mathbf{1}}$ notation is the vector of all ones. The relative weight of the opinion mixing process and the observed value are capture by a convex combination weighted by $\lambda\in (0,1)$. The additional term $\delta(k)\in \mathbb{R}$ is a noise model.
 
 A final note on this addition driving stochastic process: the result of updating the vector $V$ is an update to the vector $H$.  This can be handled between iterations. It is effectively a coordinate transformation. Fortunately this is a relatively straight-forward process thanks to linearity. 
 
