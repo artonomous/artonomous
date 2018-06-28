@@ -16,12 +16,12 @@ An Art Collector/Trader needs to have the opportunity to purchase art from the A
 
 The Patron/Investor needs to be able to bond Ethereum in support of the Autonomous Artist and to share in the financial success of the Artist. While the value per soul varies programmatically, the Patron/Investor requires that every soul (including fractions) is redeemable for Ethereum from the Pool. 
 
-##Failure Modes
+## Failure Modes
 Failure mode 1: if the artwork is deemed undesirable or overpriced Collector/Traders may not buy new artwork, this will lead to operational losses as operational costs of issuing art deplete the pool. While Patrons/Investors may subsidize this process for a time, it may lead to Failure mode 2.
 
 Failure mode 2: if there is a loss in confidence by Patrons and all souls are returned for Ethereum, the pool may be emptied and the Artonomous Artist my lack the funds to generate and sell new artworks.
 
-##Design Goals
+## Design Goals
 1)	Give each artwork the opportunity to be purchased at a market discovered price by designing an auction mechanism for the “Purchase” action. Thus ensuring the a continued revenue stream for the Artonomous Artist.
 2)	Provide the Patron/Investors with a bonding curve that allows them to sustainably support the activities of the Artonomous Artist and share in its profits via a withdraw function without violating goal 1. 
 3)	Define the minting and burning mechanisms such that the floating supply of souls is a representation of the Artonomous artists current and future perceived value as measured by the collective actions of agents interacting with the Artonomous Artist, as both collectors and patrons.
