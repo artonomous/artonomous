@@ -1,7 +1,7 @@
 ## Descriptive Goals
 	
-Artonomous is a self-sustaining, self-improving, autonomous artist. It generates art by itself, sells it and incentivizes humans to improve the art it creates. Owners of the art piece owns the scarce, immutable, collectible. This is implemented on the Ethereum blockchain.
--	Quote from Readme (Simon)
+Artonomous is a self-sustaining, self-improving, autonomous artist. It generates art by itself, sells it and incentivizes humans to improve the art it creates. Owners of the art piece owns the scarce, immutable, collectible art. This is implemented on the Ethereum blockchain.
+-	Quote from [Readme](https://github.com/simondlr/artonomous/blob/9551c9ad6eb582368bdd9acb4eb1bed50736854c/README.md) (Simon)
 
 ## System Level Requirements
 	
