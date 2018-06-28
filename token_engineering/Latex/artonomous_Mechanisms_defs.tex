@@ -6,6 +6,7 @@
 \usepackage{graphicx}
 \usepackage{amssymb}
 \usepackage{epstopdf}
+\usepackage{hyperref}
 \DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
 \newtheorem{definition}{Definition}
 
@@ -92,7 +93,7 @@ E_\alpha^+ = E_\alpha - c(w) \label{costs}
 \end{equation}
 where this update occurs during block $k_0(w)$. It is insufficient to represent this as 
 \[ E_\alpha(k_0+1) = E_\alpha (k_o) - c(w) \]
-because other transactions effecting the balance $E_\alpha$ may occur during block $k_0$. The $^+$ notation is used for discrete event state updates that occur with the ordered list of transactions that make up block $k_0$. For more details see \cite{MZ_ICCS2018}.
+because other transactions effecting the balance $E_\alpha$ may occur during block $k_0$. The $^+$ notation is used for discrete event state updates that occur with the ordered list of transactions that make up block $k_0$. For more details see \cite{MZICCS18}.
 
 \begin{definition}
 The \textbf{Auction} Mechanism is the mathematical inner workings of the public purchase method which allows any user to buy a piece of artwork in the Gallery. Denote the price of purchases artwork $w\in \mathcal{G}$ as $p_w(\kappa)$ where $\kappa = k- k_0(w)$ represents the period of time that $w$ has been in the Gallery.  
@@ -218,13 +219,29 @@ At this time, trading behavior does not influence the Artonomous Economy state. 
 The \textbf{Patron} role is characterized by bonding, holding, trading or burning Soul.  A Patron $a$ is assumed to have some private perceived valuation of Soul $V_a$ denominated in Ether and some quantity of Soul $S_a$.  
 \end{definition}
 
-The private signals $V_a$ maybe be rational or irrational or a mixture. Rational estimates are general derived from the spot prices, effective payout of liquidating ones entire balance and/or a project future value of these quantities. By starting with these quantities and adding noise to create value distributions, the the model effectively accounts for a mixture of rational and irrational behavior as encoded by the choice of stochastic process. Under the assumption that there is at any block $k$ a distribution $V$ of private valuations of Soul it is possible model the system by assuming that Patron Agents will  mint and burn their Soul for Ether at prices and in quantities equivalent to arbitraging against their private belief of the Soul value. The effect of decomposing the behavoir model in this manner is that agents are always mathematically rational with respect to their signal but that private signal itself is capable of encoding irrational beliefs, which are in turn captured via stochastic process models used in creating the value distribution $V$.
+The private signals $V_a$ maybe be rational or irrational or a mixture. Rational estimates are general derived from the spot prices, effective payout of liquidating ones entire balance and/or a project future value of these quantities. By starting with these quantities and adding noise to create value distributions, the the model effectively accounts for a mixture of rational and irrational behavior as encoded by the choice of stochastic process. Under the assumption that there is at any block $k$ a distribution $V$ of private valuations of Soul it is possible model the system by assuming that Patron Agents will  mint and burn their Soul for Ether at prices and in quantities equivalent to arbitraging against their private belief of the Soul value. The effect of decomposing the behavior model in this manner is that agents are always mathematically rational with respect to their signal but that private signal itself is capable of encoding irrational beliefs, which are in turn captured via stochastic process models used in creating the value distribution $V$.
 
+In order to implement a system level model of user behavior, construct a balance weight distribution, which one can think of as a histogram of prices weighted by quantities of Soul tokens. This mathematical object may sound exotic, but an order book is essentially the same data object. Define our histogram bins as as the ordered list of values $r\in\mathbb{R}_+^{n+1}$ such that 
+\begin{equation}
+r_i = i \cdot \frac{r_{max}}{n}
+\end{equation}
+for $i \in \{0,1,2,\ldots, n\}$. There are $n$ bins and bin $i$ covers range $[r_i, r_{i+1})$. Our order book like histogram, can then be defined as $H\in\mathbb{R}_+^n$ where 
+\begin{equation}
+H_i = \sum_{a\in \{a | r_i\le V_a < r_{i+1}\}  } V_a \cdot S_a.
+\end{equation}
+
+This histogram view allows us to consider the Patrons as state dependent actors with out needing to handle all the complexities that arise from an LTE system as outlined in \cite{MZICCS18}.
 
 \section{Economy Discrete Differential Equations}
 
 section{Future Work} 
 
 Write simulations in python.
+
+  \begin{thebibliography}{1}
+
+  \bibitem{MZICCS18} Michael Zargham, Zixuan Zhang, Victor Preciado {\em A State-Space Modeling Framework for Engineering Blockchain-Enabled Economic Systems}, \url{https://github.com/BlockScience/artonomous/blob/master/token_engineering/Reference/ICCS2018.pdf}  2018.
+
+  \end{thebibliography}
 
 \end{document}  
