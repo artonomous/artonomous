@@ -1,0 +1,226 @@
+\documentclass[11pt]{amsart}
+\usepackage{geometry}                % See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   % ... or a4paper or a5paper or ... 
+%\geometry{landscape}                % Activate for for rotated page geometry
+%\usepackage[parfill]{parskip}    % Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+\newtheorem{definition}{Definition}
+
+\title{Artonomous Mechanisms Definitions}
+\author{Michael Zargham}
+%\date{}                                           % Activate to display a given date or no date
+
+\begin{document}
+\maketitle
+%\section{}
+%\subsection{}
+Formal definitions of the Artonomous economy and component mechanisms for consideration and Review by Architect and Principle Engineer, Simon De La Rouviere. % eg. Hello
+
+\section{System State Variable Definitions}
+
+As simple preliminaries define the Ethereum network block height to be indexed by $k$, the set of all Ethereum addresses to be denoted $\mathcal{A}$, the address of the Artonomous contract to by $\alpha\in \mathcal{A}$ and that all other Ethereum addresses may be references as some $a\in \mathcal{A}$.
+
+\begin{definition}
+Define the \textbf{Gallery} to the set of unique Artworks owned by the Artonomous Contract. The set will be denoted $\mathcal{G}$ for Gallery and each unique artwork in $w\in \mathcal{G}$ is a non-fungible token whose state is stored by the Artonomous contract.  The set of all works is given by $\mathcal{W}$.
+\end{definition}
+
+For any work $w\in \mathcal{W}$, there is mapping 
+\begin{equation}
+\hbox{Owner}: \mathcal{W} \rightarrow \mathcal{A}
+\end{equation}
+that is to say, that for any $w\in \mathcal{W}$ there is an
+\begin{equation}
+a(w) := \hbox{Owner}(w) \in  \mathcal{A}
+\end{equation}
+is the address that owns the artwork $w$.  Furthermore, the Gallery is formally the set
+\begin{equation}
+\mathcal{G} = \left\{w\in \mathcal{W} |  a(w)  = \alpha \right\} \subseteq \mathcal{W}.
+\end{equation}
+
+\begin{definition} The data containing the \textbf{Blueprint} for each artwork $w$ must also be contained in the non-fungible token. For the purpose of this system level analysis that data is defined abstractly as a mapping.
+\end{definition}
+
+For any work $w\in \mathcal{W}$, there is mapping 
+\begin{equation}
+\hbox{Data}: \mathcal{W} \rightarrow \mathcal{D}
+\end{equation}
+where $\mathcal{D}$ is the domain of the artwork blueprints. This can be thought of as the custom data type which which be defined by some struct within the NFT definition.  It suffices to to say, that for any $w\in \mathcal{W}$ there is an
+\begin{equation}
+d(w) := \hbox{Data}(w) \in  \mathcal{D}.
+\end{equation}
+It is assumed that there is some logic component that case decode any $d\in\mathcal{D}$ to render the artwork as a result of simply querying the data $d(w)$ from token $w$. Note, an interesting feature might be to allow the owner $a(w)$ to determine permissions for querying the blueprint $d(w)$ from contract $\alpha$. Further note that while the Blueprint for any given artwork is unchanging in $k$, the owner account can be expected to change. All artwork $w$ has owner $a(w)=\alpha$ in the block $k_0(w)$ which is the block when that artwork was created.
+
+\begin{definition}
+The Ethereum Balance of the Artonomous Control called the \textbf{Pool} is an explicit state of the contract $\alpha$ in the Ethereum network. Denote the value of the Pool $E_\alpha(k)$ at block height $k$. \end{definition}
+
+Further, establish the notation that $E_a$ is the balance in Ethereum of any account $a\in \mathcal{A}$. The Balance of the Pool is the central state variable of the Artonomous Artist Economy; this value serves as the central coupling variable interrelating the component mechanisms presented in the following section.
+
+\begin{definition}
+The Artonomous Contract may issue a fungible token called a \textbf{Soul} Token in exchange for Ethereum.  The balance of Soul owned by any address $a$ is given by $S_a(k)$ The total Soul floating in the Ethereum network is
+\[ 
+S(k) = \sum_{a\in\mathcal{A}} S_a(k)
+\]
+which is a state variable immediately observable from Artonomous contract.
+\end{definition}
+
+The Artonomous Artist may have a balance of Souls $S_\alpha$. It is proposed that this balance be created in accordance with the initial Ether balance of the deployed main-net contract $\alpha$ in a quantity consistent with the Bonding Curve equations as defined by the Bonding mechanism in the following section. An important consequence of the Artonomous Contract owning Soul is that all other Patrons can only collectively extract 
+\begin{equation}
+\Delta E(k) = \frac{S(k) - S_\alpha(k)}{S(k)} E_\alpha(k) \label{Delta}
+\end{equation}
+at anytime $k$, providing us a means of demonstrating that a particular set of designed mechanisms allow the Autonomous Artist resilience to failure by running out of funds. Note that \eqref{Delta} assumes a proportional withdrawal mechanism as described in the Artononous Readme.
+
+
+\section{System Component Definitions}
+
+In this section each of the four mechanisms which interact as part of the Artonomous economy are defined. Those mechanisms are
+\begin{enumerate}
+\item Art Generation and NFT Minting
+\item Art Sale - Auction Mechanism
+\item Patron Bonding mechanism - Soul Minting
+\item Patron Withdrawal mechanism - Soul Burning 
+\end{enumerate}
+
+\begin{definition}
+The Art Generation Mechanism is a private method of the Artonomous contract only to be used by the Bot responsible for triggering the art generation event each day. Note that due to the passivity of smart contracts, some off-chain actor must broadcast this transaction.  It is however necessary to define the cost of this action. Define the generation event of artwork $w$ to be $g(w)$ and the block height of $g(w)$ to be $k_0(w)$. The cost of generating artwork $w$ denoted in Ether is $c(w)$.
+\end{definition}
+It is out of scope for this analysis to specific the extent to which the art generation code lives in the off-chain bot or in the on-chain method. What is in scope is accounting for the impact of an artwork generation event on the Pool.
+\begin{equation}
+E_\alpha^+ = E_\alpha - c(w) \label{costs}
+\end{equation}
+where this update occurs during block $k_0(w)$. It is insufficient to represent this as 
+\[ E_\alpha(k_0+1) = E_\alpha (k_o) - c(w) \]
+because other transactions effecting the balance $E_\alpha$ may occur during block $k_0$. The $^+$ notation is used for discrete event state updates that occur with the ordered list of transactions that make up block $k_0$. For more details see \cite{MZ_ICCS2018}.
+
+\begin{definition}
+The \textbf{Auction} Mechanism is the mathematical inner workings of the public purchase method which allows any user to buy a piece of artwork in the Gallery. Denote the price of purchases artwork $w\in \mathcal{G}$ as $p_w(\kappa)$ where $\kappa = k- k_0(w)$ represents the period of time that $w$ has been in the Gallery.  
+\end{definition}
+Any acceptable Auction Mechanism must have the form
+\begin{equation}
+\hbox{Price}:  \mathcal{W} \times \mathbb{W} \rightarrow \mathbb{R}_+
+\end{equation}
+where $\mathbb{W} = \{0,1,2,...\}$ is the set of whole numbers and $\mathbb{R}_+$ is nonnegative real numbers. Modeling the output as a nonnegative real is sufficient for modeling purposed but the implementation with in fact require an Integer data type consistent with the Ether cryptocurrency.
+
+The author proposes the following construction:
+\begin{itemize}
+\item Define a global parameter $\gamma \in (0,1)$ to be the exponential discounting rate
+\item Set a local variable $p_0$ to be equal to the largest purchase price that occurred in the last week (approximated by block range)
+\item At the generation event define 
+\[ p_w(0) = p_0\]
+\item For each subsequent block decrement 
+\[ p_w(\kappa) = \gamma \cdot p_w(\kappa-1) \]
+\end{itemize}
+
+Note that this method is consistent with the inexact backtracking line search, a common tool in convex optimization. Implementation notes: the value $\gamma$ must be stored as two integers $\eta$ and $\beta$ such that $\gamma = \frac{\eta}{\beta}$ and $\eta<\beta$ each decrement is subject to rounding errors caused by rounding errors in approximating floating point math with integers.
+
+The event where an artwork $w$ is purchased occurs at block $k_1(w)$, and therefore yields revenue according to
+\begin{equation}
+E_\alpha^+ = E_\alpha + p_w\left(k_1(w)-k_0(w)\right) \label{rev}
+\end{equation}
+for artwork $w$, where $p_w\left(k_1(w)-k_0(w)\right)$ is computed at the time transaction itself is computed.
+
+The goal of this mechanism is to provide collectors a good opportunity to purchase the artwork at their bid price without requiring extensive transactions. The value $p_0$ is created at the generation event and the Artonomous can always compute the price associated with a purchase event as part of resolving the transaction. Cite the Cryptokitties auction contract which uses a linear declining price auction with similar mechanics.
+
+\begin{definition}
+The \textbf{Bonding} Mechanism is the mathematic inner workings of the public method which mints Soul in exchange for Ether. The mechanism is defined as a bonding curve which is a special case of a value function as defined in \cite{MZICCS18}. Define the bonding function as $B(E_\alpha, S)$.
+\end{definition}
+A simple separable construction would be
+\begin{equation}
+B(E_\alpha, S) = \frac{g(E_\alpha)}{f(S)}.
+\end{equation}
+Interpreting $B(E_\alpha, S)=c$ as invariant the Bonding Mechanism must attempt to enforce,
+\begin{equation}
+{f(S)}=c\cdot{g(E_\alpha)},
+\end{equation}
+it suffices to set $c=1$ as any desired constants can be encoded in $f(\cdot)$ and $g(\cdot)$.  A bonding curve is generally expressed with $f(S) = S$ so that it can be interpreted as
+\begin{equation}
+S = g(E_\alpha)
+\end{equation}
+which implies an instantaneous price
+\begin{equation}
+\frac{\partial B(e,S)}{\partial e} = \frac{\partial g(e)}{\partial e}.
+\end{equation}
+
+The author defers on proposing a bonding curve but will demonstrate the concept by discussing the quadratic bonding curve where $f(x)=x$ and $g(y)=y^2/2$, applied as
+\begin{eqnarray}
+f(S) &=& S\\
+h(E_\alpha) &=& \frac{E_\alpha^2}{2}\\
+B(E_\alpha, S) &=& \frac{E_\alpha^2}{2S}.
+\end{eqnarray}
+
+This construct implies an instantaneous of the value of Soul in Ether as 
+\begin{equation}
+\frac{\partial B(e,S)}{\partial e} \big{|}_{e=E_\alpha} = \frac{E_\alpha}{S}
+\end{equation}
+Ether per Soul, a value directly queriable from the Artonomous Conrtact. However, bonding Ether to the Artononmous contract is not determined by this spot price. The Bonding curve, being a special case of an invariant allows direct computation of the minted Soul for any Ether bonding transaction via invariant conservation. In the general case, the spot price computed by manipulating the invariant equation 
+
+Suppose, the current state of the Bonding curve is $B(E_\alpha, S)$ and a user engages with the Artonomous contract by making a bonding transaction that sends an amount of Ether $e$. Then the amount of Soul minted to the message sender is given by the requirement that
+\begin{equation}
+B(E_\alpha+e, S+s) = B(E_\alpha, S).
+\end{equation} 
+In the quadratic case,
+\begin{equation}
+\frac{(E_\alpha+e)^2}{2(S+s)} = \frac{E_\alpha^2}{2S}
+\end{equation} 
+and it suffices to solve for $s$,
+\begin{equation}
+s = s(e,E_\alpha, S) = 
+\end{equation}
+
+Such an invariant based derivation means that the designer may choose any bonding curve with $f(S)=S$ and can reasonably expect to have a simply computable mechanism. More complex mechanisms may be designed for general $f(S)$ but the calculus becomes more difficult and in many cases impractical for derivation or computation.
+
+Having defined the Bonding mechanism as state dependent, it can be viewed as state update
+\begin{eqnarray}
+E_\alpha^+ &=& E_\alpha + e \\
+S^+ &=& S+s(e,E_\alpha, S)\\
+&=& .
+\end{eqnarray}
+for each user action characterized by Bonding an amount of Ether $e$ and receiving an amount of soul $s(e,E_\alpha, S)$.
+
+\begin{definition}
+The \textbf{Withdraw} Mechanism is the mathematical inner workings of the public method by which users sends $s$ Soul to the Artonomous contract in exchange for $e=e(s,E_\alpha, S)$ Ether. 
+\end{definition}
+
+As noted above the mechanism for withdrawals is stated in the existing Artonomous Documentation as a proportional share of the Pool. The associated equation for the mechanism is
+\begin{equation}
+e=e(s,E_\alpha, S) = \frac{s}{S} E_\alpha
+\end{equation}
+resulting in state change equations
+\begin{eqnarray}
+S^+ &=& S-s\\
+E_\alpha^+ &=& E_\alpha - e(s,E_\alpha, S)\\
+&=& \left(1-\frac{s}{S}\right) E_\alpha.
+\end{eqnarray}
+Note that by observing that $s\le S-S_\alpha$, the result in equation \eqref{Delta} for $\Delta E = E^+_\alpha - E_\alpha$ is easily recovered algebraically
+
+%\begin{equation}
+%\end{equation}
+
+\section{Behavior Model}
+
+In order to create an entire system model, it is not sufficient characterize how the mechanisms work, it is also required that behavioral models are defined for each of the user roles which will interact with these mechanisms. Two user types are considered, Patrons and Collectors, an account $a$ may at any time be acting as an combination of these rules as determined by which mechanisms engaged with.
+
+\begin{definition}
+The \textbf{Collector} role is characterized by buying, holding, selling, or trading artworks $w$.  A collector $a$ is assumed to have some private valuation $v_a(w)$ denominated in Ether for all artworks $w$. The Collector will decide to buy, sell, or trade artwork when a opportunity presents itself.
+\end{definition}
+
+For the purposes of this analysis, we need only consider the decision to buy from the Gallery. An opportunity to buy an artwork will be accepted if $v_a(w)>p_w(\kappa)$. Due to the backtracking nature of the auction presented, the Collector with the largest $v_a(w)$ is the most likely to purchase any particular work, but in the case that $p_0$ is too low, any agent with $v_a(w)>p_0$ may be the first to claim the work.
+
+For the purpose of economy design testing an exogenous stochastic process will randomly generate a value $v(w)$ which represents the maximum any active Collector is willing to pay $\max_a v_a(w)$ for each work when it is generated. Note that this value accounts only for active Collectors and not Collectors who might wish to Purchase the artwork but are not monitoring the Gallery and thus cannot take the action. Modeling the period of attention of Collectors is out of scope at this time. The purchase of that artwork will be accounted for in the system precisely when $p_w(\kappa)$ falls below $v_a$.
+
+The state update equations associated with the Collectors purchase action resolve according to equation \eqref{rev} and $k_1(w)=k_0+\kappa$ is blockheight when $p_w(\kappa)< v_a$.  This is a \textit{rational} model with respect to the private valuation of the artwork, however, that valuation can be based on anything, including random noise, so it is possible to model arbitrary irrational behavior using the simple $v_a(w)$ model.
+
+At this time, trading behavior does not influence the Artonomous Economy state. If in the future, fees for trades were imposed, then additional revenue streams could only be accounted for by enhancing the behavioral model of collectors to include both attention and distributions of value functions in order to estimate the rates of artwork circulation and account for the related revenues.
+
+\begin{definition}
+The \textbf{Patron} role is characterized by bonding, holding, trading or burning Soul.  A Patron $a$ is assumed to have some private perceived valuation of Soul $V_a$ denominated in Ether and some quantity of Soul $S_a$.  
+\end{definition}
+
+The private signals $V_a$ maybe be rational or irrational or a mixture. Rational estimates are general derived from the spot prices, effective payout of liquidating ones entire balance and/or a project future value of these quantities. By starting with these quantities and adding noise to create value distributions, the the model effectively accounts for a mixture of rational and irrational behavior as encoded by the choice of stochastic process. Under the assumption that there is at any block $k$ a distribution $V$ of private valuations of Soul it is possible model the system by assuming that Patron Agents will  mint and burn their Soul for Ether at prices and in quantities equivalent to arbitraging against their private belief of the Soul value. The effect of decomposing the behavoir model in this manner is that agents are always mathematically rational with respect to their signal but that private signal itself is capable of encoding irrational beliefs, which are in turn captured via stochastic process models used in creating the value distribution $V$.
+
+
+\section{Economy Discrete Differential Equations}
+
+\end{document}  
