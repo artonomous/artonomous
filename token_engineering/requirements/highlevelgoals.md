@@ -4,7 +4,19 @@ Artonomous is a self-sustaining, self-improving, autonomous artist. It generates
 -	Quote from [Readme](https://github.com/simondlr/artonomous/blob/9551c9ad6eb582368bdd9acb4eb1bed50736854c/README.md) (Simon)
 
 ## System Level Requirements
-	
+1. Every day, Artonomous creates and sells a piece of art
+1. The proceeds from the art that is sold gets deposited into a pool controlled by Artonomous (the _Pool_)
+1. The art is created by an offline piece of code (the _Generator_) which takes a blockhash from Ethereum as its input
+1. The piece of art is represented as an ERC721-token, tradable and transferable on the Ethereum blockchain
+1. The system is governed by holders of soul tokens
+1. Soul token holders determine what Generator will be used by the artist
+1. At any point someone can mint soul tokens by sending ETH to the artist
+1. The more soul tokens in circulation, the higher the price of the new soul tokens
+1. The ETH used to mint soul tokens is deposited in the Pool
+1. A soul token can at any point be destroyed for access to a percentage of the ETH in the Pool
+
+
+
 The Artonomous economy has 3 roles:
 1)	The Artonomous Artist
 2)	The Art Collector/Trader
