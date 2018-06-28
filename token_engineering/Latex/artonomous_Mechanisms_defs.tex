@@ -153,7 +153,7 @@ B(E_\alpha, S) &=& \frac{E_\alpha^2}{2S}.
 
 This construct implies an instantaneous of the value of Soul in Ether as 
 \begin{equation}
-\frac{\partial B(e,S)}{\partial e} \big{|}_{e=E_\alpha} = \frac{E_\alpha}{S}
+\frac{\partial B(e,S)}{\partial e} \big{|}_{e=E_\alpha} = \frac{E_\alpha}{S} \label{spot}
 \end{equation}
 Ether per Soul, a value directly queriable from the Artonomous Conrtact. However, bonding Ether to the Artononmous contract is not determined by this spot price. The Bonding curve, being a special case of an invariant allows direct computation of the minted Soul for any Ether bonding transaction via invariant conservation. In the general case, the spot price computed by manipulating the invariant equation 
 
@@ -167,7 +167,7 @@ In the quadratic case,
 \end{equation} 
 and it suffices to solve for $s$,
 \begin{equation}
-s = s(e,E_\alpha, S) = \left(2\frac{e}{E_\alpha}+e^2\right)\cdot S
+s = s(e,E_\alpha, S) = \left(2\frac{e}{E_\alpha}+e^2\right)\cdot S \label{bond}
 \end{equation}
 
 Such an invariant based derivation means that the designer may choose any bonding curve with $f(S)=S$ and can reasonably expect to have a simply computable mechanism. More complex mechanisms may be designed for general $f(S)$ but the calculus becomes more difficult and in many cases impractical for derivation or computation.
@@ -186,7 +186,7 @@ The \textbf{Withdraw} Mechanism is the mathematical inner workings of the public
 
 As noted above the mechanism for withdrawals is stated in the existing Artonomous Documentation as a proportional share of the Pool. The associated equation for the mechanism is
 \begin{equation}
-e=e(s,E_\alpha, S) = \frac{s}{S} E_\alpha
+e=e(s,E_\alpha, S) = \frac{s}{S} E_\alpha \label{withdraw}
 \end{equation}
 resulting in state change equations
 \begin{eqnarray}
@@ -219,24 +219,110 @@ At this time, trading behavior does not influence the Artonomous Economy state. 
 The \textbf{Patron} role is characterized by bonding, holding, trading or burning Soul.  A Patron $a$ is assumed to have some private perceived valuation of Soul $V_a$ denominated in Ether and some quantity of Soul $S_a$.  
 \end{definition}
 
-The private signals $V_a$ maybe be rational or irrational or a mixture. Rational estimates are general derived from the spot prices, effective payout of liquidating ones entire balance and/or a project future value of these quantities. By starting with these quantities and adding noise to create value distributions, the the model effectively accounts for a mixture of rational and irrational behavior as encoded by the choice of stochastic process. Under the assumption that there is at any block $k$ a distribution $V$ of private valuations of Soul it is possible model the system by assuming that Patron Agents will  mint and burn their Soul for Ether at prices and in quantities equivalent to arbitraging against their private belief of the Soul value. The effect of decomposing the behavior model in this manner is that agents are always mathematically rational with respect to their signal but that private signal itself is capable of encoding irrational beliefs, which are in turn captured via stochastic process models used in creating the value distribution $V$.
+The private signals $V_a$ maybe be rational or irrational or a mixture. Rational estimates are general derived from the spot prices, effective payout of liquidating ones entire balance and/or a project future value of these quantities. By starting with these quantities and adding noise to create value distributions, the the model effectively accounts for a mixture of rational and irrational behavior as encoded by the choice of stochastic process. Under the assumption that there is at any block $k$ a distribution of private valuations of Soul it is possible model the system by assuming that Patron Agents will  mint and burn their Soul for Ether at prices and in quantities equivalent to arbitraging against their private belief of the Soul value. The effect of decomposing the behavior model in this manner is that agents are always mathematically rational with respect to their signal but that private signal itself is capable of encoding irrational beliefs, which are in turn captured via stochastic process models used in creating the value distribution.
 
 In order to implement a system level model of user behavior, construct a balance weight distribution, which one can think of as a histogram of prices weighted by quantities of Soul tokens. This mathematical object may sound exotic, but an order book is essentially the same data object. Define our histogram bins as as the ordered list of values $r\in\mathbb{R}_+^{n+1}$ such that 
 \begin{equation}
 r_i = i \cdot \frac{r_{max}}{n}
 \end{equation}
-for $i \in \{0,1,2,\ldots, n\}$. There are $n$ bins and bin $i$ covers range $[r_i, r_{i+1})$. Our order book like histogram, can then be defined as $H\in\mathbb{R}_+^n$ where 
+for $i \in \{0,1,2,\ldots, n\}$. There are $n$ bins and bin $i$ covers range $[r_i, r_{i+1})$ and the final element, $r_{n}=r_{max}$. Our order book like histogram, can then be defined as $H\in\mathbb{R}_+^n$ where 
 \begin{equation}
 H_i = \sum_{a\in \{a | r_i\le V_a < r_{i+1}\}  } V_a \cdot S_a.
 \end{equation}
 
-This histogram view allows us to consider the Patrons as state dependent actors with out needing to handle all the complexities that arise from an LTE system as outlined in \cite{MZICCS18}.
+This histogram view allows us to consider the Patrons as state dependent actors with out needing to handle all the dimensional complexities that arise from a Linear Time Expanding (LTE) system as outlined in \cite{MZICCS18}. 
 
-\section{Economy Discrete Differential Equations}
+At any block $k$, the spot price estimate of Soul Tokens in Ether is computed according to equation \eqref{spot},
+\begin{equation}
+P = \frac{E_\alpha}{S}.
+\end{equation}
+The value $P$ must fall in some bin $j$, $P\in[r_j, r_{j+1})$. Let us assume that agents in bin $j$ have insufficient incentive to act.  For the purpose of deriving actions, consider each bin to act as an aggregate agent $i$ with Soul value belief
+\begin{equation}
+\bar V_i = \frac{r_{j+1}-r_j}{2}
+\end{equation}
+with total balance $H_i$.
 
-section{Future Work} 
+For all bins $i<j$ the Soul tokens the Patrons possess are valued by the Artonomous contract higher than by the agents, that is $\bar V_i \ge P$. Therefore arbitrage actions involve burning Soul Tokens in exchange for Ether to the extent that Artonomous contracts estimate $P$ can be expected to move to $\bar V_i$, which these agents may compute using the Bonding curve and spot price equations. Consider an action $s_i$ respecting mechanism \eqref{withdraw} such that the following constraint remains true:
+\begin{equation}
+\frac{E_\alpha -e_i(s_i,E_\alpha, S)}{S-s_i} \le \bar V_i.
+\end{equation}
+However, the ratio $P^+=\frac{E_\alpha+e_i}{S+s_i}$ is conserved over all pairs $(s_i,e_i)$ respecting equation \eqref{withdraw}, so the rational response is to sell up to $H_i$. In order to provide additional control in the simulation, add a parameter $\phi \in (0,1]$ representing the percentage of the Soul to be burned, resulting the state update equation
+\begin{eqnarray}
+H_i^+ &=& \phi H_i \,\,\forall \,i<j\\
+S^+ &=& S - \phi \sum_{i<j} H_i \\
+E_\alpha^+ &=& E_\alpha - \sum_{i<j} e_i(s_i, E_\alpha, S)\\
+&=&E_\alpha \left(1- \frac{\phi \sum_{i<j} H_i}{S} \right)
+\end{eqnarray}
 
-Write simulations in python.
+
+Now let us consider, the bins bins $i>j$ the Soul tokens the Patrons posses are valued by the Artonomous contract lower than by the agents, that is $\bar V_i \le P$. Therefore therefore arbitrage actions involve bonding Ether in order to Mint Soul tokens to the extent that the Artonomous contracts estimate $P$ can be expected to move to $\bar V_i$, which these agents may compute using the Bonding curve equation. Consider an action $e_i$ respecting mechanism \eqref{bond} such that the following constraint remains true:
+\begin{equation}
+\frac{E_\alpha +e_i}{S+s_i(e_i, E_\alpha, S)} \ge \bar V_i.
+\end{equation}
+The maximal arbitrage action would be to choose $\hat e_i$ such that the constraint above is met with equality. The action is to be defined as a fixed fraction $\theta$ of the maximal action, $e_i= \max \{0, \theta \hat e_i\}$. Computing that action $\hat e_i $ satisfies the equation
+\begin{equation}
+E_\alpha+\hat e_i  = \bar V_i \cdot S\cdot \left(1+2 \frac{\hat e_i}{E_\alpha}+\hat e_i^2 \right)
+\end{equation}
+which may be reorganized as
+\begin{equation}
+\hat e_i^2+ \frac{1}{E_\alpha}\left(2-\frac{E_\alpha}{V_i \cdot S}\right)\hat e_i + \left(1-\frac{E_\alpha}{ V_i \cdot S}\right) = 0,
+\end{equation}
+and solved via the quadratic equation, at taking the root further right on the real line
+\begin{equation}
+\hat e_i= \hbox{Re}\left[\frac{1}{2 V_i \cdot S}-\frac{1}{E_\alpha} + \sqrt{ \frac{E_\alpha}{V_i \cdot S}  +\frac{1}{4 V_i^2 \cdot S^2} + \frac{1}{E_\alpha^2}- \frac{1}{V_i \cdot S}  -1}\,\right]. \label{ehat}
+\end{equation}
+The resulting state update equations are left in implicitly in terms of
+\begin{align}
+e_i(V_i, &E_\alpha, S)  =\\ 
+&\theta\cdot \max\left\{0, \hbox{Re}\left[\frac{1}{2 V_i \cdot S}-\frac{1}{E_\alpha} + \sqrt{ \frac{E_\alpha}{V_i \cdot S}  +\frac{1}{4 V_i^2 \cdot S^2} + \frac{1}{E_\alpha^2}- \frac{1}{V_i \cdot S}  -1}\,\right]\right\} \nonumber
+\end{align}
+with the amount of Soul being minted calculated as
+\begin{eqnarray}
+s_i(V_i, E_\alpha, S)&=&s_i(e_i,E_\alpha, S)\\
+&=& \left(2\frac{e_i(V_i, E_\alpha, S)}{E_\alpha}+e^2_i(V_i, E_\alpha, S)\right)\cdot S\\
+&=&\left(2\frac{e_i}{E_\alpha}+e^2_i\right)S.
+\end{eqnarray}
+
+As inelegant as this equation is, it is directly computable from the state and thus can be implemented as part of the simulated behavior.  Note that the complexity arises for the function $g(x)$ in definition of the bonding curve, indicating that the designer should have care when considering nonlinear bonding curve functions. **With luck upon careful review by others, we'll find a bug in the derivations and this can get cleaned up.**
+
+The system wide state update as a result of the minting process is defined as
+\begin{eqnarray}
+H_i^+ &=&  H_i + \theta\cdot [\hat e_i]_+ \,\,\forall \,i>j\\
+E_\alpha^+ &=& E_\alpha + \sum_{i>j}  \theta\cdot [\hat e_i]_+\\
+S^+ &=& S + \theta \sum_{i>j} \left(2\frac{[\hat e_i]_+}{E_\alpha}+\theta\cdot [\hat e_i]^2_+\right)S 
+\end{eqnarray}
+implicitly defined in terms of $[\hat e_i]_+$ where $[\cdot]_+$ denotes the positive projection and $\hat e_i$ is computed from the previous state according to equation \eqref{ehat}.
+\section{Economic System Discrete Differential Equations}
+
+All of the definitions and derivations in the preceding sections exist for the purpose of having a well defined discrete dynamical system model characterized by state feedback mechanisms and well defined driving stochastic processes.
+
+\begin{eqnarray}
+\mathcal{G}(k+1) &=& \left(\mathcal{G}(k) \setminus \{w: k_1(w)=k\}\right) \cup \{w : k_0 = k\} \\
+E_\alpha(k+1) &=& E_\alpha(k) \cdot \left(1- \frac{\phi \sum_{i<j} H_i}{S}\right) + \sum_{i>j}  \theta\cdot [\hat e_i]_+\\
+&&+\sum_{w\in\{w: k_1(w)=k\}} p_w\left(k-k_0(w)\right)  \qquad-\sum_{w\in\{w : k_0(w) = k\}} c(w)\\
+S(k+1) &=& S \cdot \left(1+ \theta \sum_{i>j} \left(2\frac{[\hat e_i]_+}{E_\alpha}+\theta\cdot [\hat e_i]^2_+\right)\right)- \phi \sum_{i<j} H_i \\
+H_i(k+1) &=& \phi H_i(k) \,\,\forall \,i<j\\
+H_i(k+1) &=& H_i(k) + \theta\cdot [\hat e_i]_+ \,\,\forall \,i>j.
+\end{eqnarray}
+Under this model the implied price of Soul token in Ether is given by
+\begin{equation}
+P(k) = \frac{E_\alpha(k)}{S(k)}
+\end{equation}
+at every block $k$.
+
+To iterate a simulation using this differential equation it is necessary to choose a distribution for the artwork values $v_w$ and to select from that distribution a value for each artwork $w$ generated.  It is also necessary to draw belief distribution $V_i$ for all bins $i$.  
+
+It would be possible to further drive the system with evolving private beliefs of $V_i$ by defining a state dependent linear transformation
+\begin{equation}
+V(k+1) =  \lambda T V(k) + (1-\lambda) P(k) \mathbf{1}  + \delta(k)
+\end{equation}
+where $T$ is stochastic matrix representing mixing of opinions and $P(k) \mathbf{1}$ represents the influence of the observed price. The relative weight of the opinion mixing process and the observed value are capture by a convex combination weighted by $\lambda\in (0,1)$. The additional term $\delta(k)$ is a noise mode.
+
+A final note on this addition driving stochastic process: the result of updating the vector $V$ is an update to the vector $H$.  This can be handled between iterations. It is effectively a coordinate transformation. Fortunately this is a relatively straight-forward process thanks to linearity. 
+
+\section{Future Work} 
+
+Write simulations in python. Profit! (a.k.a. iterate mechanism design and testing until desired economy level properties emerge).
 
   \begin{thebibliography}{1}
 
