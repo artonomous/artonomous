@@ -4,7 +4,7 @@ Artonomous is a self-sustaining, self-improving, autonomous artist. It generates
 -	Quote from [Readme](https://github.com/simondlr/artonomous/blob/9551c9ad6eb582368bdd9acb4eb1bed50736854c/README.md) (Simon)
 
 ## System Level Requirements
-1. Every day, Artonomous must create and put for sale a piece of art
+1. Every day (revising to think of as every interval of blocks), Artonomous must create and put for sale a piece of art
 1. The art is created by an offline piece of software (the _Generator_) which takes a blockhash from the Ethereum blockchain as its input
 1. It must be possible to improve the Generator
 1. The art created is immutable
