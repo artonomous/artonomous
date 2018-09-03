@@ -4,7 +4,7 @@ pragma solidity ^0.4.24; //solhint-disable-line compiler-fixed
 // untested
 
 import "tokens/eip20/EIP20.sol";
-import "zeppelin/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 
 /// @title  EthBondingCurvedToken - A bonding curve

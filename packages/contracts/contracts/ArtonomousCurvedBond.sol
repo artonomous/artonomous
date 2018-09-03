@@ -2,7 +2,7 @@ pragma solidity ^0.4.24; //solhint-disable-line compiler-fixed
 
 import './EthBondingCurvedToken.sol';
 
-contract ArtonomousCurvedBond is EthBondingCurvedToken('Artonomous SOUL', 18, 'SOUL') {
+contract ArtonomousCurvedBond is EthBondingCurvedToken {
 
     /// @dev constructor        Initializes the bonding curve
     /// @param name             The name of the token
@@ -10,7 +10,7 @@ contract ArtonomousCurvedBond is EthBondingCurvedToken('Artonomous SOUL', 18, 'S
     /// @param symbol           The symbol of the token
     /// @param _exponent        The exponent of the curve
     uint exponent;
-    constructor() public {
+    constructor() EthBondingCurvedToken('Artonomous SOUL', 18, 'SOUL') public {
         exponent = 1; // linear curve
     }
 }
