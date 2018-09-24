@@ -4,4 +4,10 @@ Artonomous smart contracts.
 
 To test:
 
-run ```npm run build```, then run ```truffle test```.
+run
+
+```
+truffle install
+npm run build
+truffle test
+```
