@@ -1,0 +1,10 @@
+{
+  "name": "artonomous",
+  "version": "1.0.0",
+  "repository": "git@github.com:artonomous/artonomous-mvp",
+  "author": " ",
+  "license": "MIT",
+  "dependencies": {
+    "openzeppelin-solidity": "^1.12.0"
+  }
+}
