@@ -1,0 +1,1102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xmile version="1.0" xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" xmlns:isee="http://iseesystems.com/XMILE">
+	<header>
+		<smile version="1.0" namespace="std, isee" uses_arrays="1"/>
+		<name>Artonomous</name>
+		<uuid>73c72b23-4f0d-495f-a4e6-1daf3fba2fa3</uuid>
+		<vendor>isee systems, inc.</vendor>
+		<product version="1.6.2" isee:build_number="1445" isee:saved_by_v1="true" lang="en">Stella Professional</product>
+	</header>
+	<sim_specs isee:simulation_delay="0.001" method="CYCLE_TIME" time_units="Blocks" isee:instantaneous_flows="false">
+		<start>1</start>
+		<stop>1000</stop>
+		<dt>1</dt>
+	</sim_specs>
+	<dimensions>
+		<dim name="Gen_id" size="15"/>
+	</dimensions>
+	<isee:prefs show_module_prefix="true" live_update_on_drag="true" show_restore_buttons="false" layer="model" saved_runs="5" keep="false" rifp="true"/>
+	<isee:multiplayer_settings include_chat="true" allow_observers="false" advance_time_increment="1" observer_start_page="home_page" enabled="false"/>
+	<isee:time_formats default_format="Builtin">
+		<isee:time_format name="Builtin" type="adaptive"/>
+	</isee:time_formats>
+	<default_format/>
+	<isee:sensi_specs_list active_index="0">
+		<isee:sensi_specs name="Sensitivity" method="multivariate" runs="0"/>
+	</isee:sensi_specs_list>
+	<model_units/>
+	<model>
+		<variables>
+			<stock name="Gallery">
+				<doc>Gallery. Count of descrete NFTs</doc>
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>0</eqn>
+				<inflow>Generate_Art</inflow>
+				<outflow>Issue_Art</outflow>
+				<non_negative/>
+				<units>artwork</units>
+			</stock>
+			<flow name="Generate Art">
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>Generation_Trigger[Gen_id]</eqn>
+				<non_negative/>
+				<units>artwork/Blocks</units>
+			</flow>
+			<aux name="Generation Trigger">
+				<doc>Any contract that is a generator gets one peice in the gallery at a time and the generator is triggered when the previous sells</doc>
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>IF(Generator_Contracts[Gen_id]=1) AND (Gallery[Gen_id]=0) THEN 1 ELSE 0</eqn>
+				<units>Truth</units>
+			</aux>
+			<flow name="Issue Art">
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>IF(purchase_event[Gen_id]&gt;0)THEN 1 ELSE 0</eqn>
+				<non_negative/>
+				<units>artwork/Blocks</units>
+			</flow>
+			<stock name="Pool">
+				<doc>Pool. Total quantity of Ether held by the Artonmous Smart Contract</doc>
+				<eqn>initial_ETH</eqn>
+				<inflow>Bond_ETH</inflow>
+				<inflow>Puchase_Art</inflow>
+				<outflow>Pay_autoGenReward</outflow>
+				<outflow>Withdraw</outflow>
+				<non_negative/>
+			</stock>
+			<flow name="Bond ETH">
+				<eqn>Bond_Behavoir</eqn>
+				<non_negative/>
+			</flow>
+			<flow name="Puchase Art">
+				<eqn>SUM(rev_share_logic*purchase_event)+AutoGen_Reward</eqn>
+				<non_negative/>
+			</flow>
+			<stock name="Soul\nSupply">
+				<doc>Gallery. Count of descrete NFTs</doc>
+				<eqn>LN(initial_ETH)</eqn>
+				<inflow>Mint_Soul</inflow>
+				<outflow>Burn_Soul</outflow>
+				<non_negative/>
+				<units>soul</units>
+			</stock>
+			<flow name="Mint Soul">
+				<eqn>bond_mechanism</eqn>
+				<non_negative/>
+				<units>soul/Blocks</units>
+			</flow>
+			<flow name="Burn Soul">
+				<eqn>Burn_Behavoir</eqn>
+				<non_negative/>
+				<units>soul/Blocks</units>
+			</flow>
+			<flow name="Pay autoGenReward">
+				<eqn>SUM(Generate_Art)*AutoGen_Reward</eqn>
+				<non_negative/>
+			</flow>
+			<flow name="Withdraw">
+				<eqn>withdraw_mechanism</eqn>
+				<non_negative/>
+			</flow>
+			<aux name="AutoGen Reward">
+				<eqn>.008</eqn>
+				<units>ETH</units>
+			</aux>
+			<aux name="Auction Price">
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>base_price*decay_rate^(blocktime_in_gallery)</eqn>
+			</aux>
+			<aux name="blocktime in gallery">
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>TIME-last_gen_block</eqn>
+			</aux>
+			<stock name="Votes">
+				<doc>Gallery. Count of descrete NFTs</doc>
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>UNIFORM(0, .1)</eqn>
+				<inflow>Stake_Vote</inflow>
+				<outflow>unstake_vote</outflow>
+				<non_negative/>
+				<units>soul</units>
+			</stock>
+			<flow name="Stake Vote">
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>Stake_Behavoir</eqn>
+				<non_negative/>
+				<units>soul/Blocks</units>
+			</flow>
+			<flow name="unstake vote">
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>unstake_behavoir</eqn>
+				<non_negative/>
+				<units>soul/Blocks</units>
+			</flow>
+			<stock name="Generator\nContracts">
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>0</eqn>
+				<inflow>Voted_in</inflow>
+				<outflow>voted_out</outflow>
+				<non_negative/>
+			</stock>
+			<flow name="voted out">
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>IF(vote_distribution[Gen_id]&lt;threshold) AND (Generator_Contracts[Gen_id]=1) THEN 1 ELSE 0</eqn>
+				<non_negative/>
+			</flow>
+			<flow name="Voted in">
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>IF(vote_distribution[Gen_id]&gt;threshold) AND (Generator_Contracts[Gen_id]=0) THEN 1 ELSE 0</eqn>
+				<non_negative/>
+			</flow>
+			<aux name="vote distribution">
+				<doc>Simple logic: any gen_id with more than 10% of the votes is in. any gen_id with less is out. This means there are at most 10</doc>
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>IF(SUM(Votes)=0) THEN 0 ELSE Votes[Gen_id]/SUM(Votes)</eqn>
+			</aux>
+			<aux name="threshold">
+				<doc>perecent of votes per period you must have to be a generator</doc>
+				<eqn>.09</eqn>
+			</aux>
+			<flow name="Gen rev">
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>purchase_event[Gen_id]*(1-rev_share_logic[Gen_id])</eqn>
+				<non_negative/>
+				<units>ETH/Blocks</units>
+			</flow>
+			<stock name="Cumulative\nGen Rev">
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>0</eqn>
+				<inflow>Gen_rev</inflow>
+				<non_negative/>
+				<units>ETH</units>
+			</stock>
+			<aux name="last gen block">
+				<doc>track the last block each generator produced a peice of art.</doc>
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>IF(Generation_Trigger[Gen_id]=1) THEN TIME ELSE PREVIOUS(SELF, 0)</eqn>
+			</aux>
+			<aux name="initial ETH">
+				<eqn>10</eqn>
+			</aux>
+			<aux name="Burn Behavoir">
+				<doc>compute the withdraw amount that brings the lower spread valuing patrons to equilibrium</doc>
+				<eqn>MIN(free_soul_frac*Soul_Supply,  (Soul_Supply/Pool -Mean_perceived_value*(1-spread_factor))*Pool )</eqn>
+			</aux>
+			<aux name="Bond Behavoir">
+				<doc>compute the bonding that brings the higher spread value to equilibrium</doc>
+				<eqn>MAX(0,Soul_Supply/((1+spread_factor)*Mean_perceived_value*Pool)-Pool)</eqn>
+			</aux>
+			<aux name="Stake Behavoir">
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>Soul_Supply*free_soul_frac*base_rate</eqn>
+			</aux>
+			<aux name="unstake behavoir">
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>IF(withdraw_mechanism&gt;free_soul_frac*Soul_Supply) THEN (free_soul_frac-withdraw_mechanism/Soul_Supply)*Votes[Gen_id] ELSE 0</eqn>
+			</aux>
+			<aux name="withdraw mechanism">
+				<eqn>Burn_Soul*Pool/Soul_Supply</eqn>
+			</aux>
+			<aux name="bond mechanism">
+				<eqn>Soul_Supply*(LN(Pool+Bond_ETH)/LN(Pool)-1)</eqn>
+				<units>soul</units>
+			</aux>
+			<stock name="Cumulative\nPatron Rev">
+				<eqn>0</eqn>
+				<inflow>Withdraw</inflow>
+				<non_negative/>
+			</stock>
+			<aux name="decay rate">
+				<eqn>.001</eqn>
+			</aux>
+			<aux name="purchase event">
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>IF(Auction_Price[Gen_id]+AutoGen_Reward&lt;max_valuation[Gen_id]) THEN Auction_Price[Gen_id] ELSE 0</eqn>
+				<units>ETH</units>
+			</aux>
+			<aux name="max valuation">
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>WEIBULL(1, 1.5)*Gallery[Gen_id]</eqn>
+				<units>ETH</units>
+			</aux>
+			<aux name="rev share logic">
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>max_rev_share*(1-vote_distribution[Gen_id])</eqn>
+			</aux>
+			<aux name="max rev share">
+				<eqn>.75</eqn>
+			</aux>
+			<aux name="base price">
+				<dimensions>
+					<dim name="Gen_id"/>
+				</dimensions>
+				<eqn>RANDOM(.25, 10)</eqn>
+				<units>ETH</units>
+			</aux>
+			<stock name="Cumulative\nartworks\nissued">
+				<eqn>0</eqn>
+				<inflow>Issue_Art</inflow>
+				<non_negative/>
+				<units>artwork</units>
+			</stock>
+			<aux name="Mean\nperceived value">
+				<eqn>Soul_Supply/LN(Pool)</eqn>
+			</aux>
+			<aux name="spread factor">
+				<eqn>.25</eqn>
+			</aux>
+			<aux name="free soul frac">
+				<eqn>(Soul_Supply-SUM(Votes))/Soul_Supply</eqn>
+			</aux>
+			<aux name="base rate">
+				<doc>fraction of free soul that gets staked</doc>
+				<eqn>.1</eqn>
+			</aux>
+			<aux name="artwork count">
+				<eqn>SUM(Gallery)</eqn>
+			</aux>
+			<aux name="vote count">
+				<eqn>SUM(Votes)</eqn>
+			</aux>
+			<isee:dependencies>
+				<var name="Generate_Art">
+					<in>Generation_Trigger</in>
+				</var>
+				<var name="Generation_Trigger">
+					<in>Generator_Contracts</in>
+					<in>Gallery</in>
+				</var>
+				<var name="Issue_Art">
+					<in>purchase_event</in>
+				</var>
+				<var name="Pool">
+					<in>initial_ETH</in>
+				</var>
+				<var name="Bond_ETH">
+					<in>Bond_Behavoir</in>
+				</var>
+				<var name="Puchase_Art">
+					<in>rev_share_logic</in>
+					<in>purchase_event</in>
+					<in>AutoGen_Reward</in>
+				</var>
+				<var name="Soul_Supply">
+					<in>initial_ETH</in>
+				</var>
+				<var name="Mint_Soul">
+					<in>bond_mechanism</in>
+				</var>
+				<var name="Burn_Soul">
+					<in>Burn_Behavoir</in>
+				</var>
+				<var name="Pay_autoGenReward">
+					<in>Generate_Art</in>
+					<in>AutoGen_Reward</in>
+				</var>
+				<var name="Withdraw">
+					<in>withdraw_mechanism</in>
+				</var>
+				<var name="Auction_Price">
+					<in>blocktime_in_gallery</in>
+					<in>decay_rate</in>
+					<in>base_price</in>
+				</var>
+				<var name="blocktime_in_gallery">
+					<in>last_gen_block</in>
+				</var>
+				<var name="Stake_Vote">
+					<in>Stake_Behavoir</in>
+				</var>
+				<var name="unstake_vote">
+					<in>unstake_behavoir</in>
+				</var>
+				<var name="voted_out">
+					<in>vote_distribution</in>
+					<in>Generator_Contracts</in>
+					<in>threshold</in>
+				</var>
+				<var name="Voted_in">
+					<in>vote_distribution</in>
+					<in>Generator_Contracts</in>
+					<in>threshold</in>
+				</var>
+				<var name="vote_distribution">
+					<in>Votes</in>
+				</var>
+				<var name="Gen_rev">
+					<in>rev_share_logic</in>
+					<in>purchase_event</in>
+				</var>
+				<var name="last_gen_block">
+					<in>Generation_Trigger</in>
+				</var>
+				<var name="Burn_Behavoir">
+					<in>Mean_perceived_value</in>
+					<in>spread_factor</in>
+					<in>free_soul_frac</in>
+					<in>Soul_Supply</in>
+					<in>Pool</in>
+				</var>
+				<var name="Bond_Behavoir">
+					<in>Mean_perceived_value</in>
+					<in>spread_factor</in>
+					<in>Soul_Supply</in>
+					<in>Pool</in>
+				</var>
+				<var name="Stake_Behavoir">
+					<in>Soul_Supply</in>
+					<in>free_soul_frac</in>
+					<in>base_rate</in>
+				</var>
+				<var name="unstake_behavoir">
+					<in>free_soul_frac</in>
+					<in>withdraw_mechanism</in>
+					<in>Soul_Supply</in>
+					<in>Votes</in>
+				</var>
+				<var name="withdraw_mechanism">
+					<in>Soul_Supply</in>
+					<in>Pool</in>
+					<in>Burn_Soul</in>
+				</var>
+				<var name="bond_mechanism">
+					<in>Bond_ETH</in>
+					<in>Pool</in>
+					<in>Soul_Supply</in>
+				</var>
+				<var name="purchase_event">
+					<in>max_valuation</in>
+					<in>Auction_Price</in>
+					<in>AutoGen_Reward</in>
+				</var>
+				<var name="max_valuation">
+					<in>Gallery</in>
+				</var>
+				<var name="rev_share_logic">
+					<in>vote_distribution</in>
+					<in>max_rev_share</in>
+				</var>
+				<var name="Mean_perceived_value">
+					<in>Pool</in>
+					<in>Soul_Supply</in>
+				</var>
+				<var name="free_soul_frac">
+					<in>Votes</in>
+					<in>Soul_Supply</in>
+				</var>
+				<var name="artwork_count">
+					<in>Gallery</in>
+				</var>
+				<var name="vote_count">
+					<in>Votes</in>
+				</var>
+			</isee:dependencies>
+		</variables>
+		<views>
+			<style color="black" background="white" font_style="normal" font_weight="normal" text_decoration="none" text_align="center" vertical_text_align="center" font_color="black" font_family="Arial" font_size="10pt" padding="2" border_color="black" border_width="thin" border_style="none">
+				<text_box color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+				<isee:loop_indicator color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+				<numeric_display color="blue" background="white" font_size="9pt" isee:transparent="false"/>
+				<graph color="black" background="white" font_size="12pt" axis_color="#666666" grid_color="#C8C8C8" isee:graph_area_color="white" legend_position="bottom" isee:transparent="false" isee:hide_border="false">
+					<isee:series_styles>
+						<isee:series_style color="blue" thickness="1"/>
+						<isee:series_style color="red" thickness="1" pen_style="dot_dashed"/>
+						<isee:series_style color="fuchsia" thickness="1" pen_style="dotted"/>
+						<isee:series_style color="#008F44" thickness="1" pen_style="dashed"/>
+						<isee:series_style color="#FF7F00" thickness="1"/>
+						<isee:series_style color="#7F00FF" thickness="1" pen_style="dot_dashed"/>
+						<isee:series_style color="#0CA0FF" thickness="1" pen_style="dotted"/>
+						<isee:series_style color="lime" thickness="1" pen_style="dashed"/>
+						<isee:series_style color="#FF007F" thickness="1"/>
+						<isee:series_style color="aqua" thickness="1" pen_style="dot_dashed"/>
+						<isee:series_style color="#F586FF" thickness="1" pen_style="dotted"/>
+						<isee:series_style color="black" thickness="1" pen_style="dashed"/>
+						<isee:series_style color="#C8C8C8" thickness="1"/>
+					</isee:series_styles>
+				</graph>
+				<table color="black" background="#E0E0E0" text_align="right" font_size="12pt" orientation="vertical" wrap_text="false" isee:auto_fit="true" isee:use_alternate_row_colors="false" isee:unlimited_table_length="false" blank_column_width="80" column_width="160" interval="1" report_balances="beginning" report_flows="instantaneous"/>
+				<button color="black" background="#E0E0E0" font_size="12pt" transparent="false" corner_radius="0" isee:flat="false" icon_side="top"/>
+				<isee:annotation color="black" background="#E0E0E0" font_size="12pt" transparent="false" corner_radius="0" isee:flat="false" icon_side="top" popup_background_color="#FFFECF"/>
+				<slider color="black" background="#E0E0E0" font_size="12pt" num_ticks="3" label_side="top" wrap_title="true" isee:always_show_hover_tip="false" input_expands="true" input_width="100"/>
+				<isee:sim_speed_slider color="black" background="white"/>
+				<isee:time_slider color="#E95F74" background="silver"/>
+				<isee:pie_input color="black" background="white" font_size="12pt" legend_position="bottom" isee:transparent="false"/>
+				<knob color="#66CC66" background="#E0E0E0" font_size="12pt" label_side="bottom" wrap_title="true"/>
+				<numeric_input color="black" background="#E0E0E0" font_size="12pt" label_side="left" wrap_title="true" input_expands="false" input_width="100"/>
+				<switch color="black" background="#E0E0E0" font_size="12pt" label_side="top" wrap_title="true" isee:appearance="switch"/>
+				<options color="black" background="white" appearance="radio-buttons" arrangement="vertical"/>
+				<graphical_input color="black" background="#E0E0E0" font_size="12pt"/>
+				<group_input color="black" background="#E0E0E0" font_size="12pt"/>
+				<lamp color="black" background="white" font_size="9pt"/>
+				<gauge color="black" background="white" font_size="9pt" needle_color="#F09F72" bar_color="#EEEEEE" bar_progress_color="black" appearance="radial" num_major_ticks="11" num_minor_ticks="11" show_numeric_value="true"/>
+				<isee:spatial_map color="black" background="white" font_size="12pt"/>
+				<isee:animation_object color="black" background="white" font_size="12pt"/>
+			</style>
+			<view isee:show_pages="false" page_width="822" page_height="575" isee:page_cols="3" isee:page_rows="2" isee:popup_graphs_are_comparative="true" type="stock_flow">
+				<style color="black" background="white" font_style="normal" font_weight="normal" text_decoration="none" text_align="center" vertical_text_align="center" font_color="black" font_family="Arial" font_size="10pt" padding="2" border_color="black" border_width="thin" border_style="none">
+					<stock color="blue" background="white" font_color="blue" font_size="9pt" label_side="top">
+						<shape type="rectangle" width="45" height="35"/>
+					</stock>
+					<flow color="blue" background="white" font_color="blue" font_size="9pt" label_side="bottom"/>
+					<module color="blue" background="white" font_color="blue" font_size="9pt" label_side="top">
+						<shape type="rectangle" width="55" height="45"/>
+					</module>
+					<aux color="blue" background="white" font_color="blue" font_size="9pt" label_side="bottom">
+						<shape type="circle" radius="18"/>
+					</aux>
+					<group color="red" background="white" font_color="red" font_size="9pt"/>
+					<connector color="#FF007F" background="white" font_color="#FF007F" font_size="9pt" isee:thickness="1"/>
+					<text_box color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+					<isee:loop_indicator color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+					<numeric_display color="blue" background="white" font_size="9pt" isee:transparent="false"/>
+					<graph color="black" background="white" font_size="12pt" axis_color="#666666" grid_color="#C8C8C8" isee:graph_area_color="white" legend_position="bottom" isee:transparent="false" isee:hide_border="false">
+						<isee:series_styles>
+							<isee:series_style color="blue" thickness="1"/>
+							<isee:series_style color="red" thickness="1" pen_style="dot_dashed"/>
+							<isee:series_style color="fuchsia" thickness="1" pen_style="dotted"/>
+							<isee:series_style color="#008F44" thickness="1" pen_style="dashed"/>
+							<isee:series_style color="#FF7F00" thickness="1"/>
+							<isee:series_style color="#7F00FF" thickness="1" pen_style="dot_dashed"/>
+							<isee:series_style color="#0CA0FF" thickness="1" pen_style="dotted"/>
+							<isee:series_style color="lime" thickness="1" pen_style="dashed"/>
+							<isee:series_style color="#FF007F" thickness="1"/>
+							<isee:series_style color="aqua" thickness="1" pen_style="dot_dashed"/>
+							<isee:series_style color="#F586FF" thickness="1" pen_style="dotted"/>
+							<isee:series_style color="black" thickness="1" pen_style="dashed"/>
+							<isee:series_style color="#C8C8C8" thickness="1"/>
+						</isee:series_styles>
+					</graph>
+					<table color="black" background="#E0E0E0" text_align="right" font_size="12pt" orientation="vertical" wrap_text="false" isee:auto_fit="true" isee:use_alternate_row_colors="false" isee:unlimited_table_length="false" blank_column_width="80" column_width="160" interval="1" report_balances="beginning" report_flows="instantaneous"/>
+				</style>
+				<stock label_side="center" x="265" y="89" name="Gallery"/>
+				<flow label_side="left" label_angle="135" x="167.75" y="85" name="Generate Art">
+					<pts>
+						<pt x="93" y="85"/>
+						<pt x="242.5" y="85"/>
+					</pts>
+				</flow>
+				<aux label_side="top" x="430.75" y="38" name="Generation Trigger"/>
+				<connector uid="1" angle="172.147">
+					<from>Generation_Trigger</from>
+					<to>Generate_Art</to>
+				</connector>
+				<flow x="330" y="91" name="Issue Art">
+					<pts>
+						<pt x="287.5" y="91"/>
+						<pt x="384.5" y="91"/>
+					</pts>
+				</flow>
+				<stock label_side="center" x="275" y="254" name="Pool"/>
+				<flow label_side="top" x="177.25" y="249" name="Bond ETH">
+					<pts>
+						<pt x="102" y="249"/>
+						<pt x="252.5" y="249"/>
+					</pts>
+				</flow>
+				<flow x="378.125" y="254" name="Puchase Art">
+					<pts>
+						<pt x="458.75" y="254"/>
+						<pt x="297.5" y="254"/>
+					</pts>
+				</flow>
+				<stock label_side="center" x="252" y="431" name="Soul\nSupply"/>
+				<flow label_side="right" label_angle="45" x="149.25" y="431" name="Mint Soul">
+					<pts>
+						<pt x="69" y="431"/>
+						<pt x="229.5" y="431"/>
+					</pts>
+				</flow>
+				<flow label_side="right" label_angle="45" x="339.75" y="427" name="Burn Soul">
+					<pts>
+						<pt x="274.5" y="427"/>
+						<pt x="429" y="427"/>
+					</pts>
+				</flow>
+				<flow label_side="left" label_angle="135" x="275" y="205.75" name="Pay autoGenReward">
+					<pts>
+						<pt x="275" y="236.5"/>
+						<pt x="275" y="154"/>
+					</pts>
+				</flow>
+				<flow label_side="right" x="272" y="288.5" name="Withdraw">
+					<pts>
+						<pt x="272" y="271.5"/>
+						<pt x="272" y="317.5"/>
+					</pts>
+				</flow>
+				<aux label_side="top" x="331" y="239" name="AutoGen Reward"/>
+				<connector uid="2" angle="242.765">
+					<from>Generate_Art</from>
+					<to>Pay_autoGenReward</to>
+				</connector>
+				<connector uid="3" angle="172.875">
+					<from>AutoGen_Reward</from>
+					<to>Pay_autoGenReward</to>
+				</connector>
+				<aux label_side="top" x="359.25" y="162" name="Auction Price"/>
+				<aux label_side="right" x="448.75" y="144" name="blocktime in gallery"/>
+				<connector uid="4" angle="202.834">
+					<from>blocktime_in_gallery</from>
+					<to>Auction_Price</to>
+				</connector>
+				<stock label_side="center" x="249" y="509" name="Votes"/>
+				<flow x="158.25" y="505" name="Stake Vote">
+					<pts>
+						<pt x="90" y="505"/>
+						<pt x="226.5" y="505"/>
+					</pts>
+				</flow>
+				<flow x="339.75" y="505" name="unstake vote">
+					<pts>
+						<pt x="271.5" y="505"/>
+						<pt x="432" y="505"/>
+					</pts>
+				</flow>
+				<stock label_side="center" x="653" y="377" name="Generator\nContracts"/>
+				<flow label_side="left" x="653" y="434.25" name="voted out">
+					<pts>
+						<pt x="653" y="394.5"/>
+						<pt x="653" y="495"/>
+					</pts>
+				</flow>
+				<flow label_side="left" x="656" y="303" name="Voted in">
+					<pts>
+						<pt x="656" y="246.5"/>
+						<pt x="656" y="359.5"/>
+					</pts>
+				</flow>
+				<connector uid="5" angle="57.7244">
+					<from>Generator_Contracts</from>
+					<to>Generation_Trigger</to>
+				</connector>
+				<aux label_side="left" x="531" y="529" name="vote distribution"/>
+				<aux label_side="left" x="768" y="377" name="threshold"/>
+				<flow label_side="right" label_angle="45" x="543" y="232.75" name="Gen rev">
+					<pts>
+						<pt x="543" y="187"/>
+						<pt x="543" y="278.5"/>
+					</pts>
+				</flow>
+				<stock label_side="center" x="543" y="296" name="Cumulative\nGen Rev"/>
+				<aux label_side="right" x="511.5" y="98" name="last gen block"/>
+				<connector uid="6" angle="0">
+					<from>Generation_Trigger</from>
+					<to>last_gen_block</to>
+				</connector>
+				<aux x="40" y="38" name="initial ETH"/>
+				<aux label_side="top" x="210.5" y="367.5" name="Burn Behavoir"/>
+				<aux label_side="top" x="52" y="250.75" name="Bond Behavoir"/>
+				<aux label_side="top" x="42" y="512" name="Stake Behavoir"/>
+				<aux label_side="right" x="477.5" y="478.5" name="unstake behavoir"/>
+				<connector uid="7" angle="323.13">
+					<from>Stake_Behavoir</from>
+					<to>Stake_Vote</to>
+				</connector>
+				<connector uid="8" angle="231.009">
+					<from>unstake_behavoir</from>
+					<to>unstake_vote</to>
+				</connector>
+				<connector uid="9" angle="23.3556">
+					<from>Bond_Behavoir</from>
+					<to>Bond_ETH</to>
+				</connector>
+				<connector uid="10" angle="14.7436">
+					<from>Burn_Behavoir</from>
+					<to>Burn_Soul</to>
+				</connector>
+				<aux label_side="right" x="362.25" y="318.5" name="withdraw mechanism"/>
+				<connector uid="11" angle="31.7989">
+					<from>Soul_Supply</from>
+					<to>withdraw_mechanism</to>
+				</connector>
+				<connector uid="12" angle="344.249">
+					<from>Pool</from>
+					<to>withdraw_mechanism</to>
+				</connector>
+				<connector uid="13" angle="67.5839">
+					<from>Burn_Soul</from>
+					<to>withdraw_mechanism</to>
+				</connector>
+				<connector uid="14" angle="182.545">
+					<from>withdraw_mechanism</from>
+					<to>Withdraw</to>
+				</connector>
+				<aux label_side="top" x="149.25" y="303" name="bond mechanism"/>
+				<connector uid="15" angle="252.646">
+					<from>Bond_ETH</from>
+					<to>bond_mechanism</to>
+				</connector>
+				<connector uid="16" angle="201.289">
+					<from>Pool</from>
+					<to>bond_mechanism</to>
+				</connector>
+				<connector uid="17" angle="161.259">
+					<from>Soul_Supply</from>
+					<to>bond_mechanism</to>
+				</connector>
+				<connector uid="18" angle="238.736">
+					<from>bond_mechanism</from>
+					<to>Mint_Soul</to>
+				</connector>
+				<stock label_side="center" x="272" y="335" name="Cumulative\nPatron Rev"/>
+				<aux label_side="top" x="303.5" y="148.5" name="decay rate"/>
+				<aux label_side="right" x="419.125" y="196.25" name="purchase event"/>
+				<aux label_side="left" x="243.5" y="144" name="max valuation"/>
+				<connector uid="19" angle="327.724">
+					<from>max_valuation</from>
+					<to>purchase_event</to>
+				</connector>
+				<connector uid="20" angle="330.229">
+					<from>Auction_Price</from>
+					<to>purchase_event</to>
+				</connector>
+				<connector uid="21" angle="88.301">
+					<from>purchase_event</from>
+					<to>Issue_Art</to>
+				</connector>
+				<connector uid="22" angle="196.39">
+					<from>Gallery</from>
+					<to>max_valuation</to>
+				</connector>
+				<connector uid="23" angle="346.388">
+					<from>decay_rate</from>
+					<to>Auction_Price</to>
+				</connector>
+				<connector uid="24" angle="182.603">
+					<from>last_gen_block</from>
+					<to>blocktime_in_gallery</to>
+				</connector>
+				<connector uid="25" angle="77.9052">
+					<from>vote_distribution</from>
+					<to>Voted_in</to>
+				</connector>
+				<connector uid="26" angle="26.5651">
+					<from>vote_distribution</from>
+					<to>voted_out</to>
+				</connector>
+				<aux label_side="top" x="453" y="294.5" name="rev share logic"/>
+				<connector uid="27" angle="16.2602">
+					<from>rev_share_logic</from>
+					<to>Gen_rev</to>
+				</connector>
+				<connector uid="28" angle="80.5377">
+					<from>vote_distribution</from>
+					<to>rev_share_logic</to>
+				</connector>
+				<connector uid="29" angle="309.657">
+					<from>purchase_event</from>
+					<to>Gen_rev</to>
+				</connector>
+				<aux x="543" y="353.5" name="max rev share"/>
+				<connector uid="30" angle="137.891">
+					<from>max_rev_share</from>
+					<to>rev_share_logic</to>
+				</connector>
+				<connector uid="31" angle="185.356">
+					<from>rev_share_logic</from>
+					<to>Puchase_Art</to>
+				</connector>
+				<connector uid="32" angle="269.506">
+					<from>purchase_event</from>
+					<to>Puchase_Art</to>
+				</connector>
+				<aux x="582" y="148.5" name="base price"/>
+				<connector uid="33" angle="195.945">
+					<from>base_price</from>
+					<to>Auction_Price</to>
+				</connector>
+				<stock label_side="center" x="407" y="85" name="Cumulative\nartworks\nissued"/>
+				<connector uid="34" angle="112.834">
+					<from>Generator_Contracts</from>
+					<to>Voted_in</to>
+				</connector>
+				<connector uid="35" angle="291.125">
+					<from>Generator_Contracts</from>
+					<to>voted_out</to>
+				</connector>
+				<aux x="46" y="367.5" name="Mean\nperceived value"/>
+				<connector uid="36" angle="216.384">
+					<from>Pool</from>
+					<to>Mean_perceived_value</to>
+				</connector>
+				<connector uid="37" angle="190.204">
+					<from>Soul_Supply</from>
+					<to>Mean_perceived_value</to>
+				</connector>
+				<connector uid="38" angle="190.235">
+					<from>Soul_Supply</from>
+					<to>Stake_Behavoir</to>
+				</connector>
+				<connector uid="39" angle="115.641">
+					<from>Mean_perceived_value</from>
+					<to>Bond_Behavoir</to>
+				</connector>
+				<connector uid="40" angle="332.802">
+					<from>Mean_perceived_value</from>
+					<to>Burn_Behavoir</to>
+				</connector>
+				<aux x="70" y="312.5" name="spread factor"/>
+				<connector uid="41" angle="133.264">
+					<from>spread_factor</from>
+					<to>Bond_Behavoir</to>
+				</connector>
+				<connector uid="42" angle="301.097">
+					<from>spread_factor</from>
+					<to>Burn_Behavoir</to>
+				</connector>
+				<connector uid="43" angle="105.945">
+					<from>threshold</from>
+					<to>Voted_in</to>
+				</connector>
+				<connector uid="44" angle="252.474">
+					<from>threshold</from>
+					<to>voted_out</to>
+				</connector>
+				<connector uid="45" angle="43.5312">
+					<from>Gallery</from>
+					<to>Generation_Trigger</to>
+				</connector>
+				<aux x="310.25" y="466.25" name="free soul frac"/>
+				<connector uid="46" angle="63.4349">
+					<from>Votes</from>
+					<to>free_soul_frac</to>
+				</connector>
+				<connector uid="47" angle="328.82">
+					<from>Soul_Supply</from>
+					<to>free_soul_frac</to>
+				</connector>
+				<connector uid="48" angle="345.651">
+					<from>free_soul_frac</from>
+					<to>unstake_behavoir</to>
+				</connector>
+				<connector uid="49" angle="12.5288">
+					<from>AutoGen_Reward</from>
+					<to>Puchase_Art</to>
+				</connector>
+				<connector uid="50" angle="12.0948">
+					<from>AutoGen_Reward</from>
+					<to>purchase_event</to>
+				</connector>
+				<connector uid="51" angle="178.919">
+					<from>free_soul_frac</from>
+					<to>Stake_Behavoir</to>
+				</connector>
+				<connector uid="52" angle="332.412">
+					<from>withdraw_mechanism</from>
+					<to>unstake_behavoir</to>
+				</connector>
+				<connector uid="53" angle="358.854">
+					<from>Soul_Supply</from>
+					<to>unstake_behavoir</to>
+				</connector>
+				<connector uid="54" angle="331.557">
+					<from>Votes</from>
+					<to>unstake_behavoir</to>
+				</connector>
+				<connector uid="55" angle="314.053">
+					<from>Votes</from>
+					<to>vote_distribution</to>
+				</connector>
+				<aux x="84" y="561" name="base rate"/>
+				<connector uid="56" angle="156.801">
+					<from>base_rate</from>
+					<to>Stake_Behavoir</to>
+				</connector>
+				<connector uid="57" angle="158.552">
+					<from>Soul_Supply</from>
+					<to>Bond_Behavoir</to>
+				</connector>
+				<connector uid="58" angle="145.784">
+					<from>Pool</from>
+					<to>Bond_Behavoir</to>
+				</connector>
+				<connector uid="59" angle="107.241">
+					<from>free_soul_frac</from>
+					<to>Burn_Behavoir</to>
+				</connector>
+				<connector uid="60" angle="123.166">
+					<from>Soul_Supply</from>
+					<to>Burn_Behavoir</to>
+				</connector>
+				<connector uid="61" angle="220.426">
+					<from>Pool</from>
+					<to>Burn_Behavoir</to>
+				</connector>
+				<aux x="205.5" y="31" name="artwork count"/>
+				<connector uid="62" angle="114.228">
+					<from>Gallery</from>
+					<to>artwork_count</to>
+				</connector>
+				<stacked_container uid="63" x="1014" y="170.5">
+					<graph x="839" y="45.5" width="350" height="250" type="time_series" show_grid="false" include_units_in_legend="false" plot_numbers="false" isee:label_pie_slices="false" num_x_grid_lines="0" num_y_grid_lines="0" num_x_labels="5" num_y_labels="3" title="Graph" isee:fill_intensity="0.1" left_axis_multi_scale="false" left_axis_auto_scale="true" right_axis_multi_scale="false" right_axis_auto_scale="true">
+						<plot color="blue" pen_width="1" index="0" right_axis="true" show_y_axis="true">
+							<entity name="Mean_perceived_value"/>
+						</plot>
+						<plot color="red" pen_style="dot_dashed" pen_width="1" index="0" show_y_axis="true">
+							<entity name="Pool"/>
+						</plot>
+						<plot color="fuchsia" pen_style="dotted" pen_width="1" index="1" show_y_axis="true">
+							<entity name="Soul_Supply"/>
+						</plot>
+					</graph>
+				</stacked_container>
+				<aux x="210.5" y="575" name="vote count"/>
+				<connector uid="64" angle="241.699">
+					<from>Votes</from>
+					<to>vote_count</to>
+				</connector>
+				<stacked_container uid="65" x="1014" y="457">
+					<graph x="839" y="332" width="350" height="250" type="time_series" show_grid="false" include_units_in_legend="false" plot_numbers="true" isee:label_pie_slices="false" num_x_grid_lines="0" num_y_grid_lines="0" num_x_labels="5" num_y_labels="3" title="Graph" isee:fill_intensity="0.1" left_axis_multi_scale="false" left_axis_auto_scale="true" right_axis_multi_scale="false" right_axis_auto_scale="true">
+						<plot color="fuchsia" pen_width="1" index="0" show_y_axis="true">
+							<entity name="free_soul_frac"/>
+						</plot>
+						<plot color="blue" pen_width="1" index="1" show_y_axis="true">
+							<entity name="vote_count"/>
+						</plot>
+						<plot color="red" pen_width="1" index="2" show_y_axis="true">
+							<entity name="Soul_Supply"/>
+						</plot>
+					</graph>
+				</stacked_container>
+				<stacked_container uid="66" x="1237" y="50" width="462" height="266">
+					<graph x="1237" y="50" width="462" height="266" type="time_series" show_grid="false" include_units_in_legend="false" plot_numbers="false" isee:label_pie_slices="false" num_x_grid_lines="0" num_y_grid_lines="0" num_x_labels="5" num_y_labels="3" title="Graph" isee:fill_intensity="0.1" left_axis_multi_scale="false" left_axis_auto_scale="true" right_axis_multi_scale="false" right_axis_auto_scale="true">
+						<plot color="blue" isee:keep_zero_visible="true" pen_width="1" index="0" show_y_axis="true">
+							<entity name="vote_distribution[1]"/>
+						</plot>
+						<plot color="red" pen_style="dot_dashed" pen_width="1" index="1" show_y_axis="true">
+							<entity name="vote_distribution[2]"/>
+						</plot>
+						<plot color="fuchsia" pen_style="dotted" pen_width="1" index="2" show_y_axis="true">
+							<entity name="vote_distribution[3]"/>
+						</plot>
+						<plot color="#008F44" pen_style="dashed" pen_width="1" index="3" show_y_axis="true">
+							<entity name="vote_distribution[4]"/>
+						</plot>
+						<plot color="#FF7F00" pen_width="1" index="4" show_y_axis="true">
+							<entity name="vote_distribution[5]"/>
+						</plot>
+						<plot color="#7F00FF" pen_style="dot_dashed" pen_width="1" index="5" show_y_axis="true">
+							<entity name="vote_distribution[6]"/>
+						</plot>
+						<plot color="#0CA0FF" pen_style="dotted" pen_width="1" index="6" show_y_axis="true">
+							<entity name="vote_distribution[7]"/>
+						</plot>
+						<plot color="lime" pen_style="dashed" pen_width="1" index="7" show_y_axis="true">
+							<entity name="vote_distribution[8]"/>
+						</plot>
+						<plot color="#FF007F" pen_width="1" index="8" show_y_axis="true">
+							<entity name="vote_distribution[9]"/>
+						</plot>
+						<plot color="aqua" pen_style="dot_dashed" pen_width="1" index="9" show_y_axis="true">
+							<entity name="vote_distribution[10]"/>
+						</plot>
+						<plot color="#F586FF" pen_style="dotted" pen_width="1" index="10" show_y_axis="true">
+							<entity name="vote_distribution[11]"/>
+						</plot>
+						<plot color="black" pen_style="dashed" pen_width="1" index="11" show_y_axis="true">
+							<entity name="vote_distribution[12]"/>
+						</plot>
+						<plot color="#C8C8C8" pen_width="1" index="12" show_y_axis="true">
+							<entity name="vote_distribution[13]"/>
+						</plot>
+						<plot color="blue" pen_width="1" index="13" show_y_axis="true">
+							<entity name="vote_distribution[14]"/>
+						</plot>
+						<plot color="red" pen_style="dot_dashed" pen_width="1" index="14" show_y_axis="true">
+							<entity name="vote_distribution[15]"/>
+						</plot>
+					</graph>
+				</stacked_container>
+				<stacked_container uid="67" x="1239.5" y="339" width="457" height="250">
+					<graph x="1239.5" y="339" width="457" height="250" type="time_series" show_grid="false" include_units_in_legend="false" plot_numbers="false" isee:label_pie_slices="false" num_x_grid_lines="0" num_y_grid_lines="0" num_x_labels="5" num_y_labels="3" title="Graph" isee:fill_intensity="0.1" left_axis_multi_scale="false" left_axis_auto_scale="true" right_axis_multi_scale="false" right_axis_auto_scale="true">
+						<plot color="blue" pen_width="1" index="0" show_y_axis="true">
+							<entity name="Gallery[1]"/>
+						</plot>
+						<plot color="red" pen_width="1" index="1" show_y_axis="true">
+							<entity name="Gallery[2]"/>
+						</plot>
+						<plot color="fuchsia" pen_width="1" index="2" show_y_axis="true">
+							<entity name="Gallery[3]"/>
+						</plot>
+						<plot color="#008F44" pen_width="1" index="3" show_y_axis="true">
+							<entity name="Gallery[4]"/>
+						</plot>
+						<plot color="#FF7F00" pen_width="1" index="4" show_y_axis="true">
+							<entity name="Gallery[5]"/>
+						</plot>
+						<plot color="#7F00FF" pen_width="1" index="5" show_y_axis="true">
+							<entity name="Gallery[6]"/>
+						</plot>
+						<plot color="#0CA0FF" pen_width="1" index="6" show_y_axis="true">
+							<entity name="Gallery[7]"/>
+						</plot>
+						<plot color="lime" pen_width="1" index="7" show_y_axis="true">
+							<entity name="Gallery[8]"/>
+						</plot>
+						<plot color="#FF007F" pen_width="1" index="8" show_y_axis="true">
+							<entity name="Gallery[9]"/>
+						</plot>
+						<plot color="aqua" pen_width="1" index="9" show_y_axis="true">
+							<entity name="Gallery[10]"/>
+						</plot>
+						<plot color="#F586FF" pen_width="1" index="10" show_y_axis="true">
+							<entity name="Gallery[11]"/>
+						</plot>
+						<plot color="black" pen_width="1" index="11" show_y_axis="true">
+							<entity name="Gallery[12]"/>
+						</plot>
+						<plot color="#C8C8C8" pen_width="1" index="12" show_y_axis="true">
+							<entity name="Gallery[13]"/>
+						</plot>
+						<plot color="blue" pen_width="1" index="13" show_y_axis="true">
+							<entity name="Gallery[14]"/>
+						</plot>
+						<plot color="red" pen_width="1" index="14" show_y_axis="true">
+							<entity name="Gallery[15]"/>
+						</plot>
+					</graph>
+				</stacked_container>
+				<stacked_container uid="68" x="1737" y="44" width="482" height="278">
+					<graph x="1737" y="44" width="482" height="278" type="time_series" show_grid="false" include_units_in_legend="false" plot_numbers="false" isee:label_pie_slices="false" num_x_grid_lines="0" num_y_grid_lines="0" num_x_labels="5" num_y_labels="3" title="Graph" isee:fill_intensity="0.1" left_axis_multi_scale="false" left_axis_auto_scale="true" right_axis_multi_scale="false" right_axis_auto_scale="true">
+						<plot color="blue" pen_width="1" index="0" show_y_axis="true">
+							<entity name="Auction_Price[1]"/>
+						</plot>
+						<plot color="red" pen_style="dot_dashed" pen_width="1" index="1" show_y_axis="true">
+							<entity name="Auction_Price[2]"/>
+						</plot>
+						<plot color="fuchsia" pen_style="dotted" pen_width="1" index="2" show_y_axis="true">
+							<entity name="Auction_Price[3]"/>
+						</plot>
+						<plot color="#008F44" pen_style="dashed" pen_width="1" index="3" show_y_axis="true">
+							<entity name="Auction_Price[4]"/>
+						</plot>
+						<plot color="#FF7F00" pen_width="1" index="4" show_y_axis="true">
+							<entity name="Auction_Price[5]"/>
+						</plot>
+						<plot color="#7F00FF" pen_style="dot_dashed" pen_width="1" index="5" show_y_axis="true">
+							<entity name="Auction_Price[6]"/>
+						</plot>
+						<plot color="#0CA0FF" pen_style="dotted" pen_width="1" index="6" show_y_axis="true">
+							<entity name="Auction_Price[7]"/>
+						</plot>
+						<plot color="lime" pen_style="dashed" pen_width="1" index="7" show_y_axis="true">
+							<entity name="Auction_Price[8]"/>
+						</plot>
+						<plot color="#FF007F" pen_width="1" index="8" show_y_axis="true">
+							<entity name="Auction_Price[9]"/>
+						</plot>
+						<plot color="aqua" pen_style="dot_dashed" pen_width="1" index="9" show_y_axis="true">
+							<entity name="Auction_Price[10]"/>
+						</plot>
+						<plot color="#F586FF" pen_style="dotted" pen_width="1" index="10" show_y_axis="true">
+							<entity name="Auction_Price[11]"/>
+						</plot>
+						<plot color="black" pen_style="dashed" pen_width="1" index="11" show_y_axis="true">
+							<entity name="Auction_Price[12]"/>
+						</plot>
+						<plot color="#C8C8C8" pen_width="1" index="12" show_y_axis="true">
+							<entity name="Auction_Price[13]"/>
+						</plot>
+						<plot color="blue" pen_width="1" index="13" show_y_axis="true">
+							<entity name="Auction_Price[14]"/>
+						</plot>
+						<plot color="red" pen_style="dot_dashed" pen_width="1" index="14" show_y_axis="true">
+							<entity name="Auction_Price[15]"/>
+						</plot>
+					</graph>
+				</stacked_container>
+				<stacked_container uid="69" x="1750" y="339" width="465" height="250">
+					<graph x="1750" y="339" width="465" height="250" type="time_series" show_grid="false" include_units_in_legend="false" plot_numbers="false" isee:label_pie_slices="false" num_x_grid_lines="0" num_y_grid_lines="0" num_x_labels="5" num_y_labels="3" title="Graph" isee:fill_intensity="0.1" left_axis_multi_scale="false" left_axis_auto_scale="true" right_axis_multi_scale="false" right_axis_auto_scale="true">
+						<plot color="blue" pen_width="1" index="0" show_y_axis="true">
+							<entity name="Generator_Contracts[1]"/>
+						</plot>
+						<plot color="red" pen_style="dot_dashed" pen_width="1" index="1" show_y_axis="true">
+							<entity name="Generator_Contracts[2]"/>
+						</plot>
+						<plot color="fuchsia" pen_style="dotted" pen_width="1" index="2" show_y_axis="true">
+							<entity name="Generator_Contracts[3]"/>
+						</plot>
+						<plot color="#008F44" pen_style="dashed" pen_width="1" index="3" show_y_axis="true">
+							<entity name="Generator_Contracts[4]"/>
+						</plot>
+						<plot color="#FF7F00" pen_width="1" index="4" show_y_axis="true">
+							<entity name="Generator_Contracts[5]"/>
+						</plot>
+						<plot color="#7F00FF" pen_style="dot_dashed" pen_width="1" index="5" show_y_axis="true">
+							<entity name="Generator_Contracts[6]"/>
+						</plot>
+						<plot color="#0CA0FF" pen_style="dotted" pen_width="1" index="6" show_y_axis="true">
+							<entity name="Generator_Contracts[7]"/>
+						</plot>
+						<plot color="lime" pen_style="dashed" pen_width="1" index="7" show_y_axis="true">
+							<entity name="Generator_Contracts[8]"/>
+						</plot>
+						<plot color="#FF007F" pen_width="1" index="8" show_y_axis="true">
+							<entity name="Generator_Contracts[9]"/>
+						</plot>
+						<plot color="aqua" pen_style="dot_dashed" pen_width="1" index="9" show_y_axis="true">
+							<entity name="Generator_Contracts[10]"/>
+						</plot>
+						<plot color="#F586FF" pen_style="dotted" pen_width="1" index="10" show_y_axis="true">
+							<entity name="Generator_Contracts[11]"/>
+						</plot>
+						<plot color="black" pen_style="dashed" pen_width="1" index="11" show_y_axis="true">
+							<entity name="Generator_Contracts[12]"/>
+						</plot>
+						<plot color="#C8C8C8" pen_width="1" index="12" show_y_axis="true">
+							<entity name="Generator_Contracts[13]"/>
+						</plot>
+						<plot color="blue" pen_width="1" index="13" show_y_axis="true">
+							<entity name="Generator_Contracts[14]"/>
+						</plot>
+						<plot color="red" pen_style="dot_dashed" pen_width="1" index="14" show_y_axis="true">
+							<entity name="Generator_Contracts[15]"/>
+						</plot>
+					</graph>
+				</stacked_container>
+			</view>
+		</views>
+	</model>
+</xmile>
+
